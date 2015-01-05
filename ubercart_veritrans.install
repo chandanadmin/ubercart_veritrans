@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * Implements hook_requirements().
+ */
+function uc_veritrans_requirements($phase) {
+  
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function uc_veritrans_uninstall() {
+  db_delete('variable')
+      ->condition('name', "uc_veritrans_%", "LIKE")
+      ->execute();
+}

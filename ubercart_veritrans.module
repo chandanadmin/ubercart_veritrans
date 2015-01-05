@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * Defines the veritrans payment gateway.
+ */
+
+/**
+ * Implementation of hook_uc_payment_gateway().
+ */
+function ubercart_veritrans_uc_payment_method() {
+  $methods['vt_web'] = array(
+   'name' => t('Veritrans'),
+    'title' => t('Veritrans'),
+    'review' => t('Veritrans'),
+    'desc' => t('Redirect users to submit payments through Veritrans.'),
+    'callback' => 'ubercart_veritrans_ubercart_payment_method_vt_web',
+    'weight' => 1,
+    'checkout' => TRUE,
+    'no_gateway' => TRUE,
+  );
+
+  return $methods;
+}
+function ubercart_veritrans_ubercart_payment_method_vt_web($op, &$arg1){
+   switch ($op) {
+    case 'settings':     
+    $form['server_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Server Key'),
+    '#description' => t('Your Veritrans Server key.'),
+    '#default_value' => variable_get('ubercart_veritrans_server_key',''),
+    '#size' => 50,
+    '#required' => TRUE,
+  );
+
+  $form['payment_mode'] = array(
+    '#type' => 'select',
+    '#title' => t('Payment mode'),
+    '#description' => t('The mode for capturing payment.'),
+    '#options' => array(
+      'LIVE' => t('Live transactions'),
+      'TEST' => t('Test transactions'),
+    ),
+    '#default_value' => variable_get('ubercart_veritrans_payment_mode',''),
+  );
+      return $form;
+  }
+ }
+
