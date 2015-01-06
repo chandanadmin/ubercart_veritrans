@@ -3,4 +3,5 @@ description = Process payments using the veritrans payment gateway.
 dependencies[] = uc_payment
 dependencies[] = uc_credit
 package = Ubercart - payment
+files[] = ubercart_veritrans.inc
 core = 7.x

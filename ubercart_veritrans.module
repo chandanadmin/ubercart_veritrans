@@ -5,6 +5,194 @@
  * Defines the veritrans payment gateway.
  */
 
+
+/**
+ * Implements hook_permission().
+ */
+function ubercart_veritrans_permission() {
+ return array(
+     
+ );   
+}
+/**
+ * Implements hook_menu().
+ */
+function ubercart_veritrans_menu() {
+  $items = array();
+  
+  $items['vt_web/%uc_order'] = array(
+    'title' => 'Veritrans payment complete',
+    'page callback' => 'vtweb_payment_complete',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+  
+  $items['vt_web/notify'] = array(
+    'title' => 'Vt Web Payment Notificataion',
+    'page callback' => 'ubercart_veritrans_vt_web_payment_notification',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+  
+  $items['vt_web/success'] = array(
+    'title' => 'Vt Web Payment Success',
+    'page callback' => 'ubercart_veritrans_vt_web_payment_success',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  $items['vt_web/unfinsh'] = array(
+    'title' => 'Vt Web Payment Unfinsh',
+    'page callback' => 'ubercart_veritrans_vt_web_payment_unfinish',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  $items['vt_web/error'] = array(
+    'title' => 'Vt Web Payment Error',
+    'page callback' => 'ubercart_veritrans_vt_web_payment_error',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+function vtweb_payment_complete($order) {
+ Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key','');
+// Uncomment for production environment
+
+ $payment_mode = variable_get('ubercart_veritrans_payment_mode','');
+ if($payment_mode == 'TEST') {
+      Veritrans_Config::$isProduction = FALSE;
+ } else {
+      Veritrans_Config::$isProduction = TRUE;
+ }
+
+// Uncomment to enable sanitization
+// Veritrans_Config::$isSanitized = true;
+// Uncomment to enable 3D-Secure
+// Veritrans_Config::$is3ds = true;
+
+  $items_details = array();
+  foreach ($order->products as $item_id => $line_item) {
+    $item = array();
+    $item['id'] = $item_id;
+    $item['quantity'] = $line_item->qty;
+    $item['price'] = $line_item->price;
+    $item['name'] = $line_item->title;
+    $items_details[] = $item;  
+  }
+$params = array(
+    "vtweb" => array(
+    'enabled_payments' => array('credit_card'),
+    'finish_redirect_url' => variable_get('ubercart_veritrans_finish_redirect_url','http://localhost/drupal734/vt_web/success'),
+    'unfinish_redirect_url' => variable_get('ubercart_veritrans_unfinish_redirect_url','http://localhost/drupal734/vt_web/unfinsh'),
+    'error_redirect_url' => variable_get('ubercart_veritrans_error_redirect_url','http://localhost/drupal734/vt_web/error'),
+    ),
+    'transaction_details' => array(
+      'order_id' => rand(),
+      'gross_amount' => $order->order_total,
+    ),
+    'item_details' => $items_details,
+     
+    'customer_details' => array(
+      'first_name' => $order->delivery_first_name,
+      'last_name' => $order->delivery_last_name,
+      'email' => $order->primary_email,
+      'phone' => $order->delivery_phone,
+      'billing_address' => array(
+       'first_name' => $order->billing_first_name,
+        'last_name' => $order->billing_last_name,
+        'address' => $order->billing_street1. ' '.$order->billing_street2,
+        'city' => $order->billing_city,
+        'postal_code' => $order->billing_postal_code,
+        'country_code' => $order->billing_country,
+        'phone' => $order->billing_phone,
+      ),
+    ),
+    );
+  watchdog('vt_web', 'Data to send veritrans: !Response :', array('!Response' => '<pre>' . print_r($params, TRUE) . '</pre>'), WATCHDOG_DEBUG);
+  
+try {
+  // Redirect to Veritrans VTWeb page
+  $path = Ubercart_Veritrans_VtWeb::getRedirectionUrl($params);
+    drupal_goto($path);
+}
+catch (Exception $e) {
+ drupal_set_message($e->getMessage(), 'error');
+ return t('error');
+}
+}
+function ubercart_veritrans_vt_web_payment_notification() {
+$notif = new Veritrans_Notification();
+ $order = uc_order_load($notif->order_id);
+  // Exit now if the $_POST was empty.
+  if (empty($notif)) {
+    watchdog('vt_web', 'notification URL accessed with no POST data submitted.', array(), WATCHDOG_WARNING);
+    return FALSE;
+  }
+
+  watchdog('vt_web', 'Responce from Veritrance ! Response: !Response :.', array('!Response' => '<pre>' . print_r($notif, TRUE) . '</pre>'), WATCHDOG_DEBUG);
+ Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key','');
+
+$transaction = $notif->transaction_status;
+$fraud = $notif->fraud_status;
+if ($transaction == 'capture') {
+	if ($fraud == 'challenge') {
+	  // TODO Set payment status in merchant's database to 'challenge'
+	}
+	else if ($fraud == 'accept') {
+	  // TODO Set payment status in merchant's database to 'success'
+	}
+} else if ($transaction == 'cancel') {
+	if ($fraud == 'challenge') {
+	  // TODO Set payment status in merchant's database to 'failure'
+	}
+	else if ($fraud == 'accept') {
+	  // TODO Set payment status in merchant's database to 'failure'
+	}
+} else if ($transaction == 'deny') {
+  // TODO Set payment status in merchant's database to 'failure'
+}
+
+$order->order_total = round($order->order_total, 2);
+      $payment_amount = $order->order_total;
+      $context = array(
+        'revision' => 'formatted-original',
+        'type' => 'amount',
+      );
+      $options = array(
+        'sign' => TRUE,
+      );
+
+      // Confirm payment.
+      $payment_message = t('Payment using Global Veritrans. ORDERNUMBER: @ordernumber', array('@ordernumber' => $order->order_id));
+      uc_payment_enter($order->order_id, 'vt_web', $order->order_total, $order->uid, NULL, $payment_message);
+      $output = uc_cart_complete_sale($order, FALSE);
+      uc_order_update_status($order->order_id, 'payment_received');
+      $veritrans_amount = array(
+        '@amount' => uc_price($payment_amount, $context, $options),
+      );
+      $payment_submitted = t('Payment of @amount submitted through Veritrans.', $veritrans_amount);
+      uc_order_comment_save($order->order_id, 0, $payment_submitted, 'order', 'payment_received');
+      $payment_reported = t('Global Payment Webpay reported a payment of @amount.', $webpay_amount);
+      uc_order_comment_save($order->order_id, 0, $payment_reported);
+}
+
+function ubercart_veritrans_vt_web_payment_success() {
+  return t('This is success page.');
+}
+
+function ubercart_veritrans_vt_web_payment_unfinish() {
+   return t('This is unfinsh page.'); 
+}
+
+function ubercart_veritrans_vt_web_payment_error() {
+    return t('This is error page.');
+    
+}
 /**
  * Implementation of hook_uc_payment_gateway().
  */
@@ -15,17 +203,29 @@ function ubercart_veritrans_uc_payment_method() {
     'review' => t('Veritrans'),
     'desc' => t('Redirect users to submit payments through Veritrans.'),
     'callback' => 'ubercart_veritrans_ubercart_payment_method_vt_web',
+    'redirect' => 'vt_web_payment_form',
     'weight' => 1,
-    'checkout' => TRUE,
+    'checkout' => FALSE,
     'no_gateway' => TRUE,
   );
-
   return $methods;
+}
+
+
+function vt_web_payment_form($form, &$form_state, $order) {
+ $form['#action'] = url('vt_web/' . $order->order_id);
+  $form['#method'] = 'GET';
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Proceed to payment'),
+  );
+  return $form;
 }
 function ubercart_veritrans_ubercart_payment_method_vt_web($op, &$arg1){
    switch ($op) {
     case 'settings':     
-    $form['server_key'] = array(
+    $form['ubercart_veritrans_server_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Server Key'),
     '#description' => t('Your Veritrans Server key.'),
@@ -34,7 +234,7 @@ function ubercart_veritrans_ubercart_payment_method_vt_web($op, &$arg1){
     '#required' => TRUE,
   );
 
-  $form['payment_mode'] = array(
+  $form['ubercart_veritrans_payment_mode'] = array(
     '#type' => 'select',
     '#title' => t('Payment mode'),
     '#description' => t('The mode for capturing payment.'),
@@ -44,7 +244,138 @@ function ubercart_veritrans_ubercart_payment_method_vt_web($op, &$arg1){
     ),
     '#default_value' => variable_get('ubercart_veritrans_payment_mode',''),
   );
+  $form['ubercart_veritrans_error_redirect_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Error Url'),
+    '#description' => t('The mode for error url.'),
+    '#default_value' => variable_get('ubercart_veritrans_error_redirect_url',''),
+  );
+   $form['ubercart_veritrans_unfinish_redirect_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Unfinsih Url'),
+    '#description' => t('The mode for finish url.'),
+    '#default_value' => variable_get('ubercart_veritrans_finish_redirect_url',''),
+  );
+  $form['ubercart_veritrans_finish_redirect_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Finsih Url'),
+    '#description' => t('The mode for finish url.'),
+    '#default_value' => variable_get('ubercart_veritrans_finish_redirect_url',''),
+  );
       return $form;
   }
  }
 
+/**
+ * Handles authorizations and captures.
+ * Does the heavy lifting.
+ */
+function _ubercart_veritrans_charge($order, $amount, $data) {
+
+  // Build a description of the order for logging in Auth.Net.
+  $description = array();
+  foreach ((array) $order->products as $product) {
+    $description[] = $product->qty . 'x ' . $product->model;
+  }
+
+  // Check for creditecard number validation
+  if (_ubercart_credit_valid_card_number($order->payment_details['cc_number']) == FALSE) {
+    $result = _ubercart_veritrans_build_result(FALSE, _ubercart_veritrans_handle_error(40));
+  }
+  else {
+    // Instantiating our object.
+    $iATS_PL = ubercart_veritrans_get_service('ProcessLink');
+
+    // Build API parameter.
+    $request = array(
+      'invoiceNum' => $order->order_id,
+      'creditCardNum' => $order->payment_details['cc_number'],
+      'creditCardExpiry' => $creditCardExpiry,
+      'cvv2' => $order->payment_details['cc_cvv'],
+      'firstName' => $order->billing_first_name,
+      'lastName' => $order->billing_last_name,
+      'address' => $order->billing_street1,
+      'city' => $order->billing_city,
+      'state' => ubercart_get_zone_code($order->billing_zone),
+      'zipCode' => $order->billing_postal_code,
+      'total' => $order->order_total,
+      'currency' => 'USD',
+    );
+
+    //// Make the API call using the ProcessLink service.
+    $response = $iATS_PL->processCreditCard($request);
+
+    // Check the response from IATS for success or failure.
+    if (substr(trim($response['AUTHORIZATIONRESULT']), 0, 2) == 'OK') {
+      $response = explode(':', $response['AUTHORIZATIONRESULT'], 2);
+      $trxn_result = trim($response[0]);
+      $trxn_id = trim($response[1]);
+
+      /**
+       * Deal with responses.
+       */
+      // Payment accepted.
+      if ($trxn_result == 'OK') {
+        $result = _ubercart_veritrans_build_result(TRUE);
+
+        // Build an admin order comment.
+        $comment = t('<b>@status:</b> @message', array('@status' => $result['success'] ? t('ACCEPTED') : t('REJECTED'), '@message' => $response[1]));
+
+        // Save the comment to the order.
+        ubercart_order_comment_save($order->order_id, $result['user'], $comment, 'admin');
+      }
+
+      // This means the call was successful, but the card was rejected, etc.
+      else {
+        $result = _ubercart_veritrans_build_result(FALSE, _ubercart_veritrans_handle_error($trxn_id));
+      }
+      // Could not call the API.
+    }
+    else {
+
+      if (isset($response['message'])) {
+        drupal_get_messages('error');
+        $error_reason = $response['message'];
+        drupal_set_message(
+            t('We received the following error while attempting to process your payment:  @reason and the errorcode is @code', array('@reason' => $error_reason, '@code' => $response['code'])), 'error'
+        );
+        return FALSE;
+      }
+    }
+  }
+  return $result;
+}
+
+function _ubercart_veritrans_handle_error($code) {
+  $errors = array(
+    1 => 'Agent Code has not been set up on the authorization system.',
+    2 => 'Unable to process transaction. Verify and re-enter credit card information.',
+    3 => 'Charge card expired.',
+    4 => 'Incorrect expiration date.',
+    5 => 'Invalid transaction. Verify and re-enter credit card information.',
+    6 => 'Transaction not supported by institution.',
+    7 => 'Lost or stolen card.',
+    8 => 'Invalid card status.',
+    9 => 'Restricted card status. Usually on corporate cards restricted to specific sales.',
+    10 => 'Error. Please verify and re-enter credit card information.',
+    11 => 'General decline code, may have different reasons for each card type. Please have your client call customer service.',
+    14 => 'This means that the credit card is over the limit.',
+    15 => 'Decline code, may have different reasons for each card type. Please have your client call customer service.',
+    16 => 'Invalid charge card number. Verify and re-enter credit card information.',
+    17 => 'Unable to authorize transaction. Verify card information with customer and re-enter. Could be invalid name or expiry date.',
+    18 => 'Card not supported by institution.',
+    19 => 'Incorrect CVV2.',
+    22 => 'Bank Timeout. Bank lines may be down or busy. Re-try transaction later.',
+    23 => 'System error. Re-try transaction later.',
+    24 => 'Charge card expired.',
+    25 => 'Capture card. Reported lost or stolen.',
+    27 => 'System error, please re-enter transaction.',
+    29 => 'Rejected by Ticketmaster.',
+    31 => 'Manual reject code ',
+    39 => 'Contact Ticketmaster 1-888-955-5455 ',
+    40 => 'Card not supported by Ticketmaster. Invalid cc number.',
+    41 => 'Invalid Expiry date ',
+    100 => 'Authorization system down. DO NOT REPROCESS.',
+  );
+  return $errors[$code];
+}

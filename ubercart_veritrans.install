@@ -12,6 +12,6 @@ function uc_veritrans_requirements($phase) {
  */
 function uc_veritrans_uninstall() {
   db_delete('variable')
-      ->condition('name', "uc_veritrans_%", "LIKE")
+      ->condition('name', "ubercart_veritrans_%", "LIKE")
       ->execute();
 }
