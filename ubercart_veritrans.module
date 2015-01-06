@@ -159,6 +159,7 @@ function ubercart_veritrans_failure_payment($order,$notif) {
 function ubercart_veritrans_vt_web_payment_notification() {
     $notif = new Veritrans_Notification();
      $order = uc_order_load($notif->order_id);
+
      if ($order == FALSE) {
     watchdog('vt_web', 'IPN attempted for non-existent order @order_id.', array('@order_id'=>$notif->order_id), WATCHDOG_ERROR);
     return;
@@ -196,8 +197,7 @@ $fraud = $notif->fraud_status;
       // TODO Set payment status in merchant's database to 'failure'
       ubercart_veritrans_failure_payment($order,$notif);
   } else {
-      drupal_set_message(t('Something went wrong, please contact site administrator.'), 'error');
-      drupal_goto('cart');
+     watchdog('vt_web',t('Something went wrong, please contact site administrator.'));
     }
 }
 
