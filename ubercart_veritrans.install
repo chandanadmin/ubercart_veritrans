@@ -3,14 +3,59 @@
 /**
  * Implements hook_requirements().
  */
-function uc_veritrans_requirements($phase) {
-  
+function ubercart_veritrans_requirements($phase) {
+    $requirements = array();
+  if ($phase == 'runtime' || $phase == 'install') {
+    $t = get_t();
+    $has_curl = function_exists('curl_init');
+    $version = explode('-', PHP_VERSION);
+    $has_php = version_compare($version[0], '5.2.1', '>');
+    $has_json = function_exists('json_decode');
+    $requirements['ubercart_veritrans_curl'] = array(
+      'title' => $t('CURL'),
+      'value' => $has_curl ? $t('Enabled') : $t('Not found'),
+      'description' => '',
+      'severity' => REQUIREMENT_OK,
+    );
+
+    $requirements['ubercart_veritrans_php'] = array(
+      'title' => $t('PHP Version > 5.2.1'),
+      'value' => $has_php ? $t('True') : $t('False'),
+      'description' => '',
+      'severity' => REQUIREMENT_OK,
+    );
+
+    $requirements['ubercart_veritrans_json'] = array(
+      'title' => $t('JSON'),
+      'value' => $has_json ? $t('Enabled') : $t('Not found'),
+      'description' => '',
+      'severity' => REQUIREMENT_OK,
+    );
+
+    if (!$has_curl) {
+      $requirements['ubercart_veritrans_curl']['severity'] = REQUIREMENT_ERROR;
+      $url = l($t('cURL'), "http://php.net/manual/en/curl.setup.php");
+      $requirements['ubercart_veritrans_curl']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
+    }
+
+    if (!$has_php) {
+      $requirements['ubercart_veritrans_php']['severity'] = REQUIREMENT_ERROR;
+      $requirements['ubercart_veritrans_php']['description'] = $t('The testing framework could not be installed because the PHP library is not available.');
+    }
+
+    if (!$has_json) {
+      $requirements['ubercart_veritrans_json']['severity'] = REQUIREMENT_ERROR;
+      $url = l($t('Json'), "http://php.net/manual/en/book.json.php");
+      $requirements['ubercart_veritrans_json']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
+    }
+  }
+  return $requirements;
 }
 
 /**
  * Implementation of hook_uninstall().
  */
-function uc_veritrans_uninstall() {
+function ubercart_veritrans_uninstall() {
   db_delete('variable')
       ->condition('name', "ubercart_veritrans_%", "LIKE")
       ->execute();
