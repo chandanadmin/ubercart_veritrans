@@ -85,9 +85,9 @@ function vtweb_payment_complete($order) {
     $params = array(
         "vtweb" => array(
             'enabled_payments' => array('credit_card'),
-            'finish_redirect_url' => variable_get('ubercart_veritrans_finish_redirect_url', 'http://localhost/drupal734/vt_web/success'),
-            'unfinish_redirect_url' => variable_get('ubercart_veritrans_unfinish_redirect_url', 'http://localhost/drupal734/vt_web/unfinsh'),
-            'error_redirect_url' => variable_get('ubercart_veritrans_error_redirect_url', 'http://localhost/drupal734/vt_web/error'),
+            'finish_redirect_url' => variable_get('ubercart_veritrans_finish_redirect_url', url('vt_web/success')),
+            'unfinish_redirect_url' => variable_get('ubercart_veritrans_unfinish_redirect_url', url('vt_web/unfinsh')),
+            'error_redirect_url' => variable_get('ubercart_veritrans_error_redirect_url', url('vt_web/error')),
         ),
         'transaction_details' => array(
             //'order_id' => $order->order_id,
@@ -159,7 +159,7 @@ function ubercart_veritrans_failure_payment($order, $notification) {
 function ubercart_veritrans_vt_web_payment_notification() {
     $notification = new Veritrans_Notification();
     $order = uc_order_load($notification->order_id);
-    watchdog('vt_web', 'Responce from Veritrance  '.print_r($notification, TRUE),array(),WATCHDOG_DEBUG); 
+    watchdog('vt_web', 'Responce from Veritrance  <pre>'.print_r($notification, TRUE).'</pre>',array(),WATCHDOG_DEBUG);
     if ($order == FALSE) {
         watchdog('vt_web', 'IPN attempted for non-existent order @order_id.', array('@order_id' => $notification->order_id), WATCHDOG_ERROR);
         return;
@@ -174,6 +174,9 @@ function ubercart_veritrans_vt_web_payment_notification() {
     Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
     $transaction = $notification->transaction_status;
     $fraud = $notification->fraud_status;
+	
+	$notification_array = (array)$notification;
+	drupal_write_record('uc_payment_veritrans_ipn',$notification_array['Veritrans_Notificationresponse'],array('order_id')); // Save the notificaiton record
 
     if ($transaction == 'capture') {
         if ($fraud == 'challenge') {
