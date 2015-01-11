@@ -60,3 +60,98 @@ function ubercart_veritrans_uninstall() {
       ->condition('name', "ubercart_veritrans_%", "LIKE")
       ->execute();
 }
+
+
+
+/**
+ * Implements hook_schema().
+ */
+function ubercart_veritrans_schema() {
+  $schema = array();
+
+  $schema['uc_payment_veritrans_ipn'] = array(
+    'description' => 'Logs Veritrans Instant Payment Notifications.',
+    'fields' => array(
+      'order_id' => array(
+        'description' => 'The order ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'transaction_id' => array(
+        'description' => 'The transaction ID from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'payment_type' => array(
+        'description' => 'The payment type from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'gross_amount' => array(
+        'description' => 'The payment amount from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status_message' => array(
+        'description' => 'The IPN status from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'fraud_status' => array(
+        'description' => 'The IPN status from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'masked_card' => array(
+        'description' => 'The masked_card.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'transaction_status' => array(
+        'description' => 'The IPN transaction status message from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'transaction_time' => array(
+        'description' => 'The IPN transaction time.',
+        'type' => 'varchar',
+        'mysql_type' =>'datetime',
+        'not null' => FALSE,
+      ),
+	  'status_code' => array(
+        'description' => 'The status code',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'order_id' => array('order_id'),
+    ),
+    'foreign keys' => array(
+      'uc_orders' => array(
+        'table' => 'uc_orders',
+        'columns' => array('order_id' => 'order_id'),
+      ),
+    ),
+  );
+
+  return $schema;
+}
