@@ -4,7 +4,6 @@
  * @file
  * Class that will handle the Intuit Payment.
  */
-
 // Plumbing.
 require_once 'Veritrans/ApiRequestor.php';
 require_once 'Veritrans/VtWeb.php';
@@ -29,7 +28,6 @@ class Veritrans_Config {
   }
 
 }
-
 
 class Veritrans_Notification {
 
