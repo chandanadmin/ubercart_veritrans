@@ -12,24 +12,24 @@ function ubercart_veritrans_requirements($phase) {
     $has_php = version_compare($version[0], '5.2.1', '>');
     $has_json = function_exists('json_decode');
     $requirements['ubercart_veritrans_curl'] = array(
-        'title' => $t('CURL'),
-        'value' => $has_curl ? $t('Enabled') : $t('Not found'),
-        'description' => '',
-        'severity' => REQUIREMENT_OK,
+      'title' => $t('CURL'),
+      'value' => $has_curl ? $t('Enabled') : $t('Not found'),
+      'description' => '',
+      'severity' => REQUIREMENT_OK,
     );
 
     $requirements['ubercart_veritrans_php'] = array(
-        'title' => $t('PHP Version > 5.2.1'),
-        'value' => $has_php ? $t('True') : $t('False'),
-        'description' => '',
-        'severity' => REQUIREMENT_OK,
+      'title' => $t('PHP Version > 5.2.1'),
+      'value' => $has_php ? $t('True') : $t('False'),
+      'description' => '',
+      'severity' => REQUIREMENT_OK,
     );
 
     $requirements['ubercart_veritrans_json'] = array(
-        'title' => $t('JSON'),
-        'value' => $has_json ? $t('Enabled') : $t('Not found'),
-        'description' => '',
-        'severity' => REQUIREMENT_OK,
+      'title' => $t('JSON'),
+      'value' => $has_json ? $t('Enabled') : $t('Not found'),
+      'description' => '',
+      'severity' => REQUIREMENT_OK,
     );
 
     if (!$has_curl) {
@@ -53,7 +53,7 @@ function ubercart_veritrans_requirements($phase) {
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function ubercart_veritrans_uninstall() {
   db_delete('variable')
@@ -68,92 +68,92 @@ function ubercart_veritrans_schema() {
   $schema = array();
 
   $schema['uc_payment_veritrans_ipn'] = array(
-      'description' => 'Logs Veritrans Instant Payment Notifications.',
-      'fields' => array(
-          'order_id' => array(
-              'description' => 'The order ID.',
-              'type' => 'int',
-              'unsigned' => TRUE,
-              'not null' => TRUE,
-              'default' => 0,
-          ),
-          'transaction_id' => array(
-              'description' => 'The transaction ID from Veritrans.',
-              'type' => 'varchar',
-              'length' => 255,
-              'not null' => TRUE,
-              'default' => '',
-          ),
-          'payment_type' => array(
-              'description' => 'The payment type from Veritrans.',
-              'type' => 'varchar',
-              'length' => 255,
-              'not null' => TRUE,
-              'default' => '',
-          ),
-          'gross_amount' => array(
-              'description' => 'The payment amount from Veritrans.',
-              'type' => 'varchar',
-              'length' => 255,
-              'not null' => TRUE,
-              'default' => '',
-          ),
-          'status_message' => array(
-              'description' => 'The IPN status from Veritrans.',
-              'type' => 'varchar',
-              'length' => 255,
-              'not null' => TRUE,
-              'default' => '',
-          ),
-          'fraud_status' => array(
-              'description' => 'The IPN status from Veritrans.',
-              'type' => 'varchar',
-              'length' => 255,
-              'not null' => TRUE,
-              'default' => '',
-          ),
-          'masked_card' => array(
-              'description' => 'The masked_card.',
-              'type' => 'varchar',
-              'length' => 255,
-              'not null' => TRUE,
-              'default' => '',
-          ),
-          'transaction_status' => array(
-              'description' => 'The IPN transaction status message from Veritrans.',
-              'type' => 'varchar',
-              'length' => 255,
-              'not null' => TRUE,
-              'default' => '',
-          ),
-          'transaction_time' => array(
-              'description' => 'The IPN transaction time.',
-              'type' => 'varchar',
-              'mysql_type' => 'datetime',
-              'not null' => FALSE,
-          ),
-          'status_code' => array(
-              'description' => 'The status code',
-              'type' => 'int',
-              'unsigned' => TRUE,
-              'not null' => TRUE,
-              'default' => 0,
-          ),
-          'signature_key' => array(
-              'description' => 'The signature key',
-              'type' => 'text',
-              'not null' => TRUE,
-          ),
+    'description' => 'Logs Veritrans Instant Payment Notifications.',
+    'fields' => array(
+      'order_id' => array(
+        'description' => 'The order ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
       ),
-      'indexes' => array(
-          'order_id' => array('order_id'),
+      'transaction_id' => array(
+        'description' => 'The transaction ID from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
-      'foreign keys' => array(
-          'uc_orders' => array(
-              'table' => 'uc_orders',
-              'columns' => array('order_id' => 'order_id'),
-          ),
+      'payment_type' => array(
+        'description' => 'The payment type from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
+      'gross_amount' => array(
+        'description' => 'The payment amount from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status_message' => array(
+        'description' => 'The IPN status from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'fraud_status' => array(
+        'description' => 'The IPN status from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'masked_card' => array(
+        'description' => 'The masked_card.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'transaction_status' => array(
+        'description' => 'The IPN transaction status message from Veritrans.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'transaction_time' => array(
+        'description' => 'The IPN transaction time.',
+        'type' => 'varchar',
+        'mysql_type' => 'datetime',
+        'not null' => FALSE,
+      ),
+      'status_code' => array(
+        'description' => 'The status code',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'signature_key' => array(
+        'description' => 'The signature key',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'order_id' => array('order_id'),
+    ),
+    'foreign keys' => array(
+      'uc_orders' => array(
+        'table' => 'uc_orders',
+        'columns' => array('order_id' => 'order_id'),
+      ),
+    ),
   );
 
   return $schema;

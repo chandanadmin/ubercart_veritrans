@@ -143,8 +143,8 @@ class UbercartVeritrans_Sanitizer {
    */
   private function maxLength($length) {
     $this->filters[] = function($input) use($length) {
-      return substr($input, 0, $length);
-    };
+          return substr($input, 0, $length);
+        };
     return $this;
   }
 
@@ -153,8 +153,8 @@ class UbercartVeritrans_Sanitizer {
    */
   private function whitelist($regex) {
     $this->filters[] = function($input) use($regex) {
-      return preg_replace("/[^$regex]/", '', $input);
-    };
+          return preg_replace("/[^$regex]/", '', $input);
+        };
     return $this;
   }
 

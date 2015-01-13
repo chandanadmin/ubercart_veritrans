@@ -15,12 +15,12 @@ class Ubercart_Veritrans_VtWeb {
    */
   public static function getRedirectionUrl($params) {
     $payloads = array(
-        'payment_type' => 'vtweb',
-        'vtweb' => array(
-           'enabled_payments' => array('credit_card'),
-          'credit_card_3d_secure' => Veritrans_Config::$is3ds,
-        ),
-      );
+      'payment_type' => 'vtweb',
+      'vtweb' => array(
+        'enabled_payments' => array('credit_card'),
+        'credit_card_3d_secure' => Veritrans_Config::$is3ds,
+      ),
+    );
 
     if (array_key_exists('item_details', $params)) {
       $gross_amount = 0;
@@ -37,10 +37,9 @@ class Ubercart_Veritrans_VtWeb {
     }
 
     $result = CommerceVeritrans_ApiRequestor::post(
-        Veritrans_Config::getBaseUrl() . '/charge',
-        Veritrans_Config::$serverKey,
-        $payloads);
+            Veritrans_Config::getBaseUrl() . '/charge', Veritrans_Config::$serverKey, $payloads);
 
     return $result->redirect_url;
   }
+
 }
