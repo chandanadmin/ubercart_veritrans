@@ -1,11 +1,14 @@
 -- SUMMARY --
-Ubercart Veritrans[Drupal Ubercart](https://www.drupal.org/project/ubercart), module integrates with Veritrans(https://www.veritrans.co.id/) payment gateway into your Drupal Ubercart shop.
+Ubercart Veritrans[Drupal Ubercart](https://www.drupal.org/project/ubercart).
+Module integrates with Veritrans(https://www.veritrans.co.id/) payment gateway into your Drupal Ubercart shop.
 
 Veritrans Brief:
 =================
 Veritrans provides 2 methods : VT-Web and VT-direct.
-VT-Web :  Payment will be redirected to the payment page, Veritrans Style and interface kits have been provided Veritrans
-VT-direct : Payments will be processed on the Merchant side and Merchant has full control over the style and interface.
+VT-Web :  Payment will be redirected to the payment page.
+Veritrans Style and interface kits have been provided Veritrans
+-VT-direct : Payments will be processed on the Merchant side and Merchant has full control over the interface.
+
 
 We supports VT-Web method. VT-direct and Recurring payment support will come soon.
 
