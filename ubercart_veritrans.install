@@ -139,6 +139,11 @@ function ubercart_veritrans_schema() {
               'not null' => TRUE,
               'default' => 0,
           ),
+          'signature_key' => array(
+              'description' => 'The signature key',
+              'type' => 'text',
+              'not null' => TRUE,
+          ),
       ),
       'indexes' => array(
           'order_id' => array('order_id'),

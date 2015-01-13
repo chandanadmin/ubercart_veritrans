@@ -125,17 +125,19 @@ function vtweb_payment_complete($order) {
   }
 }
 
-function ubercart_veritrans_load_transaction($transaction_id) {
-  $transaction = db_select('uc_payment_veritrans_ipn','uc_vi')->fields('uc_vi')->condition('transaction_id',$transaction_id,'=')->execute()
-    ->fetchAll();
+function ubercart_veritrans_load_transaction($signature_key) {
+  $transaction = db_select('uc_payment_veritrans_ipn', 'uc_vi')->fields('uc_vi')->condition('signature_key', $signature_key, '=')->execute()
+      ->fetchAll();
   return $transaction;
 }
+
 function ubercart_veritrans_vt_web_payment_notification() {
   $notification = new Veritrans_Notification();
-  $transaction = ubercart_veritrans_load_transaction($notification->transaction_id);
-  if(!empty($transaction)) {
+  $transaction = ubercart_veritrans_load_transaction($notification->signature_key);
+  if (!empty($transaction)) {
     return FALSE;
   }
+
   $order = uc_order_load($notification->order_id);
   watchdog('vt_web', 'Responce from Veritrance  <pre>' . print_r($notification, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
 
@@ -149,7 +151,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
     return FALSE;
   }
 
-  $record = array (
+  $record = array(
       "status_code" => $notification->status_code,
       "status_message" => $notification->status_message,
       "transaction_id" => $notification->transaction_id,
@@ -160,9 +162,10 @@ function ubercart_veritrans_vt_web_payment_notification() {
       "fraud_status" => $notification->fraud_status,
       "masked_card" => $notification->masked_card,
       "gross_amount" => $notification->gross_amount,
-    );
-   watchdog('vt_web', 'Responce from Veritrance array <pre>' . print_r($record, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
-   //$notification_array = (array) $notification;
+      'signature_key' => $notification->signature_key,
+  );
+  watchdog('vt_web', 'Responce from Veritrance array <pre>' . print_r($record, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
+  //$notification_array = (array) $notification;
   //drupal_write_record('uc_payment_veritrans_ipn', $record, array('order_id')); // Save the notificaiton record
   db_insert('uc_payment_veritrans_ipn')->fields($record)->execute();
 
@@ -170,7 +173,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
   $transaction = $notification->transaction_status;
   $fraud = $notification->fraud_status;
 
-  
+
   if ($transaction == 'capture') {
     if ($fraud == 'challenge') {
       // TODO Set payment status in merchant's database to 'challenge'
@@ -198,23 +201,23 @@ function ubercart_veritrans_vt_web_payment_notification() {
       $webpay_amount = array(
           '@amount' => uc_price($payment_amount, $context, $options),
       );
-        $payment_submitted = t('Payment of @amount submitted through Veritrans.', $webpay_amount);
-        uc_order_comment_save($order->order_id, 0, $payment_submitted, 'order', 'payment_received');
-        $payment_reported = t('Veritrans  reported a payment of @amount.', $webpay_amount);
-        uc_order_comment_save($order->order_id, 0, $payment_reported);
+      $payment_submitted = t('Payment of @amount submitted through Veritrans.', $webpay_amount);
+      uc_order_comment_save($order->order_id, 0, $payment_submitted, 'order', 'payment_received');
+      $payment_reported = t('Veritrans  reported a payment of @amount.', $webpay_amount);
+      uc_order_comment_save($order->order_id, 0, $payment_reported);
     }
   }
   else if ($transaction == 'cancel') {
     if ($fraud == 'challenge' || $fraud == 'accept') {
       // TODO Set payment status in merchant's database to 'failure'
-        $webpay_error = t('Payment declined by merchant.');
-         uc_order_comment_save($order->order_id, 0, $webpay_error);
+      $webpay_error = t('Payment declined by merchant.');
+      uc_order_comment_save($order->order_id, 0, $webpay_error);
     }
   }
   else if ($transaction == 'deny') {
     // TODO Set payment status in merchant's database to 'failure'
-      $webpay_error = t('Payment declined by merchant.');
-      uc_order_comment_save($order->order_id, 0, $webpay_error);
+    $webpay_error = t('Payment declined by merchant.');
+    uc_order_comment_save($order->order_id, 0, $webpay_error);
   }
   else {
     watchdog('vt_web', t('Something went wrong, please contact site administrator.'));
@@ -222,7 +225,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
 }
 
 function ubercart_veritrans_vt_web_payment_success() {
- // uc_cart_complete_sale($order, FALSE);
+  // uc_cart_complete_sale($order, FALSE);
   return t('This is success page.');
 }
 
