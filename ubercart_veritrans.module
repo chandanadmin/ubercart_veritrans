@@ -171,7 +171,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
       uc_order_update_status($order->order_id, 'vt_web_pending');
       uc_order_comment_save($order->order_id, 0, t('Payment is pending at Veritrans'), 'admin');
     }
-    else if ($fraud == 'accept') {
+    elseif ($fraud == 'accept') {
       // TODO Set payment status in merchant's database to 'success'.
       // Update order state set to paid.
       $order->order_total = round($order->order_total, 2);
@@ -185,7 +185,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
       );
 
       // Confirm payment.
-      $payment_message = t('Payment using Veritrans. ORDERNUMBER: @ordernumber ', array('@ordernumber' => $order->order_id));
+      $payment_message = t('Payment using Veritrans. ORDERNUMBER: @ordernumber.', array('@ordernumber' => $order->order_id));
       uc_payment_enter($order->order_id, 'vt_web', $order->order_total, $order->uid, NULL, $payment_message);
       uc_cart_complete_sale($order, FALSE);
       uc_order_update_status($order->order_id, 'payment_received');
@@ -211,7 +211,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
     uc_order_comment_save($order->order_id, 0, $webpay_error);
   }
   else {
-    watchdog('vt_web', t('Something went wrong, please contact site administrator.'));
+    watchdog('vt_web', 'Something went wrong, please contact site administrator.');
   }
 }
 
@@ -237,7 +237,7 @@ function ubercart_veritrans_vt_web_payment_error() {
 }
 
 /**
- * Implementation of hook_uc_payment_gateway().
+ * Implements hook_uc_payment_gateway().
  */
 function ubercart_veritrans_uc_payment_method() {
   $methods['vt_web'] = array(
