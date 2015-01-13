@@ -21,7 +21,7 @@ function ubercart_veritrans_menu() {
 
   $items['vt_web/%uc_order'] = array(
       'title' => 'Veritrans payment complete',
-      'page callback' => 'vtweb_payment_complete',
+      'page callback' => 'ubercart_veritrans_vtweb_payment_complete',
       'page arguments' => array(1),
       'access arguments' => array('access content'),
       'type' => MENU_CALLBACK
@@ -58,7 +58,7 @@ function ubercart_veritrans_menu() {
   return $items;
 }
 
-function vtweb_payment_complete($order) {
+function ubercart_veritrans_vtweb_payment_complete($order) {
   Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
 // Uncomment for production environment
   $payment_mode = variable_get('ubercart_veritrans_payment_mode', '');
@@ -247,7 +247,7 @@ function ubercart_veritrans_uc_payment_method() {
       'review' => t('Veritrans'),
       'desc' => t('Redirect users to submit payments through Veritrans.'),
       'callback' => 'ubercart_veritrans_ubercart_payment_method_vt_web',
-      'redirect' => 'vt_web_payment_form',
+      'redirect' => 'ubercart_veritrans_vt_web_payment_form',
       'weight' => 1,
       'checkout' => FALSE,
       'no_gateway' => TRUE,
@@ -255,7 +255,7 @@ function ubercart_veritrans_uc_payment_method() {
   return $methods;
 }
 
-function vt_web_payment_form($form, &$form_state, $order) {
+function ubercart_veritrans_vt_web_payment_form($form, &$form_state, $order) {
   $form['#action'] = url('vt_web/' . $order->order_id);
   $form['#method'] = 'GET';
 
