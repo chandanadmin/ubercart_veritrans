@@ -4,6 +4,7 @@
  * @file
  * Class that will handle the Intuit Payment.
  */
+
 require_once 'Veritrans/ApiRequestor.php';
 require_once 'Veritrans/VtWeb.php';
 
@@ -21,9 +22,11 @@ class UbercartVeritrans_Config {
   const SANDBOX_BASE_URL = 'https://api.sandbox.veritrans.co.id/v2';
   const PRODUCTION_BASE_URL = 'https://api.veritrans.co.id/v2';
 
+  /**
+   * Get the payment url.
+   */
   public static function getBaseUrl() {
-    return Veritrans_Config::$isProduction ?
-        Veritrans_Config::PRODUCTION_BASE_URL : Veritrans_Config::SANDBOX_BASE_URL;
+    return Veritrans_Config::$isProduction ? Veritrans_Config::PRODUCTION_BASE_URL : Veritrans_Config::SANDBOX_BASE_URL;
   }
 
 }
@@ -32,6 +35,9 @@ class UbercartVeritrans_Notification {
 
   private $response;
 
+  /**
+   * Constructor for notification.
+   */
   public function __construct() {
     $this->response = json_decode(file_get_contents('php://input'), TRUE);
   }
@@ -62,3 +68,4 @@ class UbercartVeritrans_Transaction {
   }
 
 }
+
