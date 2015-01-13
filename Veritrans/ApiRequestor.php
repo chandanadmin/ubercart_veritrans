@@ -8,7 +8,7 @@
 /**
  * Class for API processing.
  */
-class CommerceVeritrans_ApiRequestor {
+class UbercartVeritrans_ApiRequestor {
 
   /**
    * Function for GET Url processing.

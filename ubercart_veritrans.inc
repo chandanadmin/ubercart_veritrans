@@ -11,7 +11,7 @@ require_once 'Veritrans/VtWeb.php';
 // Sanitization.
 require_once 'Veritrans/Sanitizer.php';
 
-class Veritrans_Config {
+class UbercartVeritrans_Config {
 
   public static $serverKey;
   public static $apiVersion = 2;
@@ -29,7 +29,7 @@ class Veritrans_Config {
 
 }
 
-class Veritrans_Notification {
+class UbercartVeritrans_Notification {
 
   private $response;
 
@@ -45,7 +45,7 @@ class Veritrans_Notification {
 
 }
 
-class Veritrans_Transaction {
+class UbercartVeritrans_Transaction {
 
   public static function status($id) {
     return CommerceVeritrans_ApiRequestor::get(

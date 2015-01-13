@@ -59,21 +59,20 @@ function ubercart_veritrans_menu() {
 }
 
 function ubercart_veritrans_vtweb_payment_complete($order) {
-  Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
+  UbercartVeritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
 // Uncomment for production environment
   $payment_mode = variable_get('ubercart_veritrans_payment_mode', '');
   if ($payment_mode == 'TEST') {
-    Veritrans_Config::$isProduction = FALSE;
+    UbercartVeritrans_Config_Config::$isProduction = FALSE;
   }
   else {
-    Veritrans_Config::$isProduction = TRUE;
+    UbercartVeritrans_Config_Config::$isProduction = TRUE;
   }
 
 // Uncomment to enable sanitization
 // Veritrans_Config::$isSanitized = true;
 // Uncomment to enable 3D-Secure
 // Veritrans_Config::$is3ds = true;
-
   $items_details = array();
   foreach ($order->products as $item_id => $line_item) {
     $item = array();

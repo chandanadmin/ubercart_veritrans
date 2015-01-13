@@ -8,7 +8,7 @@
 /**
  * Class for sanitizing payment fields.
  */
-class CommerceVeritrans_Sanitizer {
+class UbercartVeritrans_Sanitizer {
 
   private $filters;
 
