@@ -6,6 +6,36 @@
  */
 
 /**
+ * Implements hook_libraries_info().
+ */
+function ubercart_veritrans_libraries_info() {
+  $libraries['veritrans'] = array(
+    'name' => 'PHP client library for Veritrans',
+    'vendor url' => 'https://github.com/veritrans/veritrans-php',
+    'download url' => 'https://github.com/veritrans/veritrans-php/archive/master.zip',
+    'path' => 'Veritrans',
+    'version arguments' => array(
+      'file' => 'readme.md',
+      'pattern' => '/Veritrans (\d+)/',
+      'lines' => 6,
+    ),
+    'files' => array(
+      'php' => array(
+        'Config.php',
+        'Transaction.php',
+        'ApiRequestor.php',
+        'Notification.php',
+        'VtDirect.php',
+        'VtWeb.php',
+        'Sanitizer.php',
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
  * Implements hook_menu().
  */
 function ubercart_veritrans_menu() {
@@ -54,6 +84,7 @@ function ubercart_veritrans_menu() {
  * Function to complete the transaction and sending request to Veritrans.
  */
 function ubercart_veritrans_vtweb_payment_complete($order) {
+  libraries_load('veritrans');
   UbercartVeritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
   $payment_mode = variable_get('ubercart_veritrans_payment_mode', '');
   if ($payment_mode == 'TEST') {
@@ -125,6 +156,7 @@ function ubercart_veritrans_load_transaction($signature_key) {
  * IPN for veritrans payment gateway.
  */
 function ubercart_veritrans_vt_web_payment_notification() {
+  libraries_load('veritrans');
   $notification = new Veritrans_Notification();
   $transaction = ubercart_veritrans_load_transaction($notification->signature_key);
   if (!empty($transaction)) {

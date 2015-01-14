@@ -50,6 +50,22 @@ function ubercart_veritrans_requirements($phase) {
       $requirements['ubercart_veritrans_json']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
     }
   }
+  
+    if (in_array($phase, array('runtime', 'update'))) {
+    $library = libraries_detect('veritrans');
+    $requirements['veritrans'] = array(
+      'title' => $t('Veritrans Library'),
+      'value' => ($library['installed']) ? $t('Installed') : $t('Not found'),
+      'description' => $t('PHP client library for Veritrans is installed correctly.'),
+      'severity' => REQUIREMENT_OK,
+    );
+
+    if (!$library['installed']) {
+      $requirements['veritrans']['severity'] = REQUIREMENT_ERROR;
+      $requirements['veritrans']['description'] = $t('PHP client library for Veritrans is not installed correctly.');
+    }
+  }
+  
   return $requirements;
 }
 
