@@ -51,7 +51,7 @@ function ubercart_veritrans_requirements($phase) {
     }
   }
   
-    if (in_array($phase, array('runtime', 'update'))) {
+    if (in_array($phase, array('runtime', 'update','install'))) {
     $library = libraries_detect('veritrans');
     $requirements['veritrans'] = array(
       'title' => $t('Veritrans Library'),
@@ -175,3 +175,4 @@ function ubercart_veritrans_schema() {
 
   return $schema;
 }
+
