@@ -62,7 +62,9 @@ function ubercart_veritrans_requirements($phase) {
 
     if (!$library['installed']) {
       $requirements['veritrans']['severity'] = REQUIREMENT_ERROR;
-      $requirements['veritrans']['description'] = $t('PHP client library for Veritrans is not installed correctly.');
+      //$download_link = l(t('here'), 'https://github.com/veritrans/veritrans-php/archive/master.zip', array('attributes' => array('target' => '_blank'), 'external' => TRUE));
+      $download_link = l(t('here'), $library['download url'], array('attributes' => array('target' => '_blank'), 'external' => TRUE));
+      $requirements['veritrans']['description'] = $t('Veritrans payment library is not installed correctly. click !here to download the library and place it in a sites/all/libraries folder', array('!here' => $download_link));
     }
   }
   
@@ -175,4 +177,3 @@ function ubercart_veritrans_schema() {
 
   return $schema;
 }
-
