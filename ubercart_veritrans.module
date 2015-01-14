@@ -15,7 +15,7 @@ function ubercart_veritrans_libraries_info() {
     'download url' => 'https://github.com/veritrans/veritrans-php/archive/master.zip',
     'path' => 'Veritrans',
     'version arguments' => array(
-      'file' => 'readme.md',
+      'file' => 'README.md',
       'pattern' => '/Veritrans (\d+)/',
       'lines' => 6,
     ),
