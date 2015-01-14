@@ -85,13 +85,13 @@ function ubercart_veritrans_menu() {
  */
 function ubercart_veritrans_vtweb_payment_complete($order) {
   libraries_load('veritrans');
-  UbercartVeritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
+  Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
   $payment_mode = variable_get('ubercart_veritrans_payment_mode', '');
   if ($payment_mode == 'TEST') {
-    UbercartVeritrans_Config_Config::$isProduction = FALSE;
+    Veritrans_Config::$isProduction = FALSE;
   }
   else {
-    UbercartVeritrans_Config_Config::$isProduction = TRUE;
+    Veritrans_Config::$isProduction = TRUE;
   }
 
   $items_details = array();
@@ -134,7 +134,7 @@ function ubercart_veritrans_vtweb_payment_complete($order) {
 
   try {
     // Redirect to Veritrans VTWeb page.
-    $path = Ubercart_Veritrans_VtWeb::getRedirectionUrl($params);
+    $path = Veritrans_VtWeb::getRedirectionUrl($params);
     drupal_goto($path);
   }
   catch (Exception $e) {
