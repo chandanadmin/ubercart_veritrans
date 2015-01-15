@@ -51,24 +51,22 @@ function ubercart_veritrans_requirements($phase) {
 
     $requirements['veritrans']['title'] = 'Veritrans';
     $requirements['veritrans']['value'] = $t('Installed');
-    if (module_exists('libraries') && file_exists(libraries_get_path('veritrans') . '/Veritrans.php')) {
+    if (file_exists(dirname(__FILE__) . '/veritrans/Veritrans.php')) {
+      $requirements['footable']['severity'] = REQUIREMENT_OK;
+    }
+    elseif (module_exists('libraries') && file_exists(libraries_get_path('veritrans') . '/Veritrans.php')) {
       $requirements['footable']['severity'] = REQUIREMENT_OK;
     }
     // During site install, even if libraries is present, there is no ensuring it
     // is already enabled.
     elseif (!drupal_installation_attempted()) {
-      // Required footable library wasn't found; abort installation.
+      // Required veritrans library wasn't found; abort installation.
       $requirements['veritrans']['value'] = $t('Not found');
 
-      // Provide a download link to the FooTable jQuery plugin.
-      $download_link = $t('Veritrans library is missing, Please click !here to download. For instruction download !readme', array(
-        '!footable' => 'https://github.com/veritrans/veritrans-php/archive/master.zip',
-        '!here' => l('here', 'https://github.com/veritrans/veritrans-php/archive/master.zip', array('attributes' => array('target' => '_blank'), 'external' => true)),
-        '!readme' => l(t('README.md'), drupal_get_path('module', 'veritrans') . "/README.md"))
-      );
-
-      $requirements['veritrans']['description'] = $t('Veritrans library is missing, Please click @here to download the library', array('@here' => $download_link));
-      $requirements['footable']['severity'] = REQUIREMENT_ERROR;
+      // Provide a download link to the Veritrans library.
+      $download_link = l(t('here'), 'https://github.com/veritrans/veritrans-php/archive/master.zip', array('attributes' => array('target' => '_blank'), 'external' => TRUE));
+      $requirements['veritrans']['description'] = $t('Veritrans library is missing, Please click !here to download the library.', array('!here' => $download_link));
+      $requirements['veritrans']['severity'] = REQUIREMENT_ERROR;
     }
   }
 
