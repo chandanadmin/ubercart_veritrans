@@ -3,6 +3,7 @@
 /**
  * Implements hook_requirements().
  */
+
 function ubercart_veritrans_requirements($phase) {
   $requirements = array();
   if ($phase == 'runtime' || $phase == 'install') {
@@ -57,14 +58,12 @@ function ubercart_veritrans_requirements($phase) {
     elseif (module_exists('libraries') && file_exists(libraries_get_path('veritrans') . '/Veritrans.php')) {
       $requirements['footable']['severity'] = REQUIREMENT_OK;
     }
-    // During site install, even if libraries is present, there is no ensuring it
-    // is already enabled.
     elseif (!drupal_installation_attempted()) {
       // Required veritrans library wasn't found; abort installation.
       $requirements['veritrans']['value'] = $t('Not found');
 
       // Provide a download link to the Veritrans library.
-      $download_link = l(t('here'), 'https://github.com/veritrans/veritrans-php/archive/master.zip', array('attributes' => array('target' => '_blank'), 'external' => TRUE));
+      $download_link = l($t('here'), 'https://github.com/veritrans/veritrans-php/archive/master.zip', array('attributes' => array('target' => '_blank'), 'external' => TRUE));
       $requirements['veritrans']['description'] = $t('Veritrans library is missing, Please click !here to download the library.', array('!here' => $download_link));
       $requirements['veritrans']['severity'] = REQUIREMENT_ERROR;
     }
