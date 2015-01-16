@@ -53,10 +53,10 @@ function ubercart_veritrans_requirements($phase) {
     $requirements['veritrans']['title'] = 'Veritrans';
     $requirements['veritrans']['value'] = $t('Installed');
     if (file_exists(dirname(__FILE__) . '/veritrans/Veritrans.php')) {
-      $requirements['footable']['severity'] = REQUIREMENT_OK;
+      $requirements['veritrans']['severity'] = REQUIREMENT_OK;
     }
     elseif (module_exists('libraries') && file_exists(libraries_get_path('veritrans') . '/Veritrans.php')) {
-      $requirements['footable']['severity'] = REQUIREMENT_OK;
+      $requirements['veritrans']['severity'] = REQUIREMENT_OK;
     }
     elseif (!drupal_installation_attempted()) {
       // Required veritrans library wasn't found; abort installation.
