@@ -1,6 +1,7 @@
 -- SUMMARY --
 Ubercart Veritrans[Drupal Ubercart](https://www.drupal.org/project/ubercart).
-Module integrates with Veritrans(https://www.veritrans.co.id/) payment gateway for Ubercart.
+Module integrates with Veritrans(https://www.veritrans.co.id/) payment gateway 
+for Ubercart.
 
 Veritrans Brief:
 =================
@@ -24,13 +25,19 @@ Once you are Merchant, you will receive a Merchant Id, Client and Server Key,
 which you will require while configuring, your Drupal commerce store.
 
 -- INSTALLATION --
-The <a href="https://github.com/veritrans/veritrans-php">Veritrans PHP Library</a> should exist in a directory named "veritrans" under "libraries".
+The <a href="https://github.com/veritrans/veritrans-php">
+Veritrans PHP Library</a>  should exist in a directory named "veritrans" under 
+"libraries".
 * Install as usual, see http://drupal.org/node/70151 for further information.
-* To change Merchant Id and Payment Mode(Test Transactions or Live Transactions), 
-* Go to Store settings > Payment methods admin/store/settings/payment/method/vt_web.
+* To change Merchant Id and Payment Mode
+(Test Transactions or Live Transactions), 
+* Go to Store settings > Payment methods 
+admin/store/settings/payment/method/vt_web.
 * Look for Veritrans from available payment methods and click edit link.
 * Under "Enable payment method: Veritrans" Action, click edit link. 
-* Enter Server Key and Select Payment mode as Live transactions for Veritrans to accept real payments.
+* Enter Server Key and Select Payment mode as Live transactions for 
+Veritrans to
+ accept real payments.
 
 -- CONTACT --
 https://www.drupal.org/u/chandan.chaudhary
