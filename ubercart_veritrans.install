@@ -3,6 +3,7 @@
 /**
  * Implements hook_requirements().
  */
+
 function ubercart_veritrans_requirements($phase) {
   $requirements = array();
   if ($phase == 'runtime' || $phase == 'install') {
