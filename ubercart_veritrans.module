@@ -86,7 +86,8 @@ function ubercart_veritrans_menu() {
 function ubercart_veritrans_vtweb_payment_complete($order) {
 
   // Return an error if the enabling action's settings haven't been configured.
-  if (empty(variable_get('ubercart_veritrans_server_key', ''))) {
+  $server_key = variable_get('ubercart_veritrans_server_key', '');
+  if (empty($server_key)) {
     drupal_set_message(t('Veritrans is not configured for use. Please check the Veritrans Server Key.'), 'error');
     return FALSE;
   }
