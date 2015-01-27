@@ -151,27 +151,16 @@ function ubercart_veritrans_vtweb_payment_complete($order) {
 }
 
 /**
- * Function to load transaction.
- */
-function ubercart_veritrans_load_transaction($signature_key) {
-  $transaction = db_select('uc_payment_veritrans_ipn', 'uc_vi')->fields('uc_vi')->condition('signature_key', $signature_key, '=')->execute()
-      ->fetchAll();
-  return $transaction;
-}
-
-/**
  * IPN for veritrans payment gateway.
  */
 function ubercart_veritrans_vt_web_payment_notification() {
   libraries_load('veritrans');
   $notification = new Veritrans_Notification();
-  $transaction = ubercart_veritrans_load_transaction($notification->signature_key);
-  if (!empty($transaction)) {
-    return FALSE;
-  }
 
   $order = uc_order_load($notification->order_id);
-  watchdog('vt_web', 'Responce from Veritrance  <pre>' . print_r($notification, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
+  if (variable_get('ubercart_veritrans_debugging',false)) {
+    watchdog('vt_web', 'Responce from Veritrance  <pre>' . print_r($notification, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
+  }
 
   if ($order == FALSE) {
     watchdog('vt_web', 'IPN attempted for non-existent order @order_id.', array('@order_id' => $notification->order_id), WATCHDOG_ERROR);
@@ -182,22 +171,6 @@ function ubercart_veritrans_vt_web_payment_notification() {
     watchdog('vt_web', 'notification URL accessed with no POST data submitted.', array(), WATCHDOG_WARNING);
     return FALSE;
   }
-
-  $record = array(
-    "status_code" => $notification->status_code,
-    "status_message" => $notification->status_message,
-    "transaction_id" => $notification->transaction_id,
-    "order_id" => $notification->order_id,
-    "payment_type" => $notification->payment_type,
-    "transaction_time" => $notification->transaction_time,
-    "transaction_status" => $notification->transaction_status,
-    "fraud_status" => $notification->fraud_status,
-    "masked_card" => $notification->masked_card,
-    "gross_amount" => $notification->gross_amount,
-    'signature_key' => $notification->signature_key,
-  );
-  watchdog('vt_web', 'Responce from Veritrance array <pre>' . print_r($record, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
-  db_insert('uc_payment_veritrans_ipn')->fields($record)->execute();
 
   Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
   $transaction = $notification->transaction_status;
@@ -347,6 +320,12 @@ function ubercart_veritrans_ubercart_payment_method_vt_web($op, &$arg1) {
         '#title' => t('Finsih Url'),
         '#description' => t('The mode for finish url.'),
         '#default_value' => variable_get('ubercart_veritrans_finish_redirect_url', ''),
+      );
+      $form['ubercart_veritrans_debugging'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Debugg'),
+        '#description' => t('Check the response from veritrans.'),
+        '#default_value' => variable_get('ubercart_veritrans_debugging', FALSE),
       );
       return $form;
   }
