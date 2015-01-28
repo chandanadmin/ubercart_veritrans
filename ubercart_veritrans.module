@@ -158,7 +158,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
   $notification = new Veritrans_Notification();
 
   $order = uc_order_load($notification->order_id);
-  if (variable_get('ubercart_veritrans_debugging',false)) {
+  if (variable_get('ubercart_veritrans_debugging', FALSE)) {
     watchdog('vt_web', 'Responce from Veritrance  <pre>' . print_r($notification, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
   }
 

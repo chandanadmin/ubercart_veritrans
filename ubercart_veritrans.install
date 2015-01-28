@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Installation of ubercart veritrans module
+ */
+
+/**
  * Implements hook_requirements().
  */
 function ubercart_veritrans_requirements($phase) {
@@ -79,4 +84,5 @@ function ubercart_veritrans_uninstall() {
       ->condition('name', "ubercart_veritrans_%", "LIKE")
       ->execute();
 }
+
 
