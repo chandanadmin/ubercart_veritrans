@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Installation of ubercart veritrans module
+ * Installation of ubercart veritrans module.
  */
 
 /**
@@ -84,5 +84,3 @@ function ubercart_veritrans_uninstall() {
       ->condition('name', "ubercart_veritrans_%", "LIKE")
       ->execute();
 }
-
-
