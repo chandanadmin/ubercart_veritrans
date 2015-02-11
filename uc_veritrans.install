@@ -8,29 +8,29 @@
 /**
  * Implements hook_requirements().
  */
-function ubercart_veritrans_requirements($phase) {
+function uc_veritrans_requirements($phase) {
   $requirements = array();
   if ($phase == 'runtime' || $phase == 'install') {
     $t = get_t();
     $has_curl = function_exists('curl_init');
     $version = explode('-', PHP_VERSION);
-    $has_php = version_compare($version[0], '5.2.1', '>');
+    $php_compatible = version_compare($version[0], '5.2.1', '>');
     $has_json = function_exists('json_decode');
-    $requirements['ubercart_veritrans_curl'] = array(
+    $requirements['uc_veritrans_curl'] = array(
       'title' => $t('CURL'),
       'value' => $has_curl ? $t('Enabled') : $t('Not found'),
       'description' => '',
       'severity' => REQUIREMENT_OK,
     );
 
-    $requirements['ubercart_veritrans_php'] = array(
+    $requirements['uc_veritrans_php'] = array(
       'title' => $t('PHP Version > 5.2.1'),
-      'value' => $has_php ? $t('True') : $t('False'),
+      'value' => $php_compatible ? $t('True') : $t('False'),
       'description' => '',
       'severity' => REQUIREMENT_OK,
     );
 
-    $requirements['ubercart_veritrans_json'] = array(
+    $requirements['uc_veritrans_json'] = array(
       'title' => $t('JSON'),
       'value' => $has_json ? $t('Enabled') : $t('Not found'),
       'description' => '',
@@ -38,25 +38,26 @@ function ubercart_veritrans_requirements($phase) {
     );
 
     if (!$has_curl) {
-      $requirements['ubercart_veritrans_curl']['severity'] = REQUIREMENT_ERROR;
+      $requirements['uc_veritrans_curl']['severity'] = REQUIREMENT_ERROR;
       $url = l($t('cURL'), "http://php.net/manual/en/curl.setup.php");
-      $requirements['ubercart_veritrans_curl']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
+      $requirements['uc_veritrans_curl']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
     }
 
-    if (!$has_php) {
-      $requirements['ubercart_veritrans_php']['severity'] = REQUIREMENT_ERROR;
-      $requirements['ubercart_veritrans_php']['description'] = $t('The testing framework could not be installed because the PHP library is not available.');
+    if (!$php_compatible) {
+      $requirements['uc_veritrans_php']['severity'] = REQUIREMENT_ERROR;
+      $requirements['uc_veritrans_php']['description'] = $t('The testing framework could not be installed because the PHP version is not compatible.');
     }
 
     if (!$has_json) {
-      $requirements['ubercart_veritrans_json']['severity'] = REQUIREMENT_ERROR;
+      $requirements['uc_veritrans_json']['severity'] = REQUIREMENT_ERROR;
       $url = l($t('Json'), "http://php.net/manual/en/book.json.php");
-      $requirements['ubercart_veritrans_json']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
+      $requirements['uc_veritrans_json']['description'] = $t('The testing framework could not be installed because the PHP !json is not available.', array('!json' => $url));
     }
 
     $requirements['veritrans']['title'] = 'Veritrans';
     $requirements['veritrans']['value'] = $t('Installed');
-    if (file_exists(dirname(__FILE__) . '/veritrans/Veritrans.php')) {
+    $veritrans_class = drupal_get_path('module', 'uc_veritrans') . '/veritrans/Veritrans.php';
+    if (file_exists($veritrans_class)) {
       $requirements['veritrans']['severity'] = REQUIREMENT_OK;
     }
     elseif (module_exists('libraries') && file_exists(libraries_get_path('veritrans') . '/Veritrans.php')) {
@@ -65,7 +66,6 @@ function ubercart_veritrans_requirements($phase) {
     elseif (!drupal_installation_attempted()) {
       // Required veritrans library wasn't found; abort installation.
       $requirements['veritrans']['value'] = $t('Not found');
-
       // Provide a download link to the Veritrans library.
       $download_link = l($t('here'), 'https://github.com/veritrans/veritrans-php/archive/master.zip', array('attributes' => array('target' => '_blank'), 'external' => TRUE));
       $requirements['veritrans']['description'] = $t('Veritrans library is missing, Please click !here to download the library.', array('!here' => $download_link));
@@ -77,10 +77,21 @@ function ubercart_veritrans_requirements($phase) {
 }
 
 /**
+ * Implements hook_install().
+ */
+function uc_veritrans_install() {
+  variable_set('uc_veritrans_payment_mode', 'TEST');
+  variable_set('uc_veritrans_error_redirect_url', 'vt_web/error');
+  variable_set('uc_veritrans_unfinish_redirect_url', 'vt_web/unfinsh');
+  variable_set('uc_veritrans_finish_redirect_url', 'vt_web/success');
+  variable_set('uc_veritrans_debugging', TRUE);
+}
+
+/**
  * Implements hook_uninstall().
  */
-function ubercart_veritrans_uninstall() {
+function uc_veritrans_uninstall() {
   db_delete('variable')
-      ->condition('name', "ubercart_veritrans_%", "LIKE")
+      ->condition('name', "uc_veritrans_%", "LIKE")
       ->execute();
 }

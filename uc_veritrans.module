@@ -8,7 +8,7 @@
 /**
  * Implements hook_libraries_info().
  */
-function ubercart_veritrans_libraries_info() {
+function uc_veritrans_libraries_info() {
   $libraries['veritrans'] = array(
     'name' => 'PHP client library for Veritrans',
     'vendor url' => 'https://github.com/veritrans/veritrans-php',
@@ -38,41 +38,41 @@ function ubercart_veritrans_libraries_info() {
 /**
  * Implements hook_menu().
  */
-function ubercart_veritrans_menu() {
+function uc_veritrans_menu() {
   $items = array();
 
   $items['vt_web/%uc_order'] = array(
     'title' => 'Veritrans payment complete',
-    'page callback' => 'ubercart_veritrans_vtweb_payment_complete',
+    'page callback' => 'uc_veritrans_vtweb_payment_complete',
     'page arguments' => array(1),
-    'access arguments' => array('access content'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
   $items['vt_web/notify'] = array(
     'title' => 'Vt Web Payment Notificataion',
-    'page callback' => 'ubercart_veritrans_vt_web_payment_notification',
+    'page callback' => 'uc_veritrans_vt_web_payment_notification',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
   $items['vt_web/success'] = array(
     'title' => 'Vt Web Payment Success',
-    'page callback' => 'ubercart_veritrans_vt_web_payment_success',
+    'page callback' => 'uc_veritrans_vt_web_payment_success',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
   $items['vt_web/unfinsh'] = array(
     'title' => 'Vt Web Payment Unfinsh',
-    'page callback' => 'ubercart_veritrans_vt_web_payment_unfinish',
+    'page callback' => 'uc_veritrans_vt_web_payment_unfinish',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
   $items['vt_web/error'] = array(
     'title' => 'Vt Web Payment Error',
-    'page callback' => 'ubercart_veritrans_vt_web_payment_error',
+    'page callback' => 'uc_veritrans_vt_web_payment_error',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -83,17 +83,17 @@ function ubercart_veritrans_menu() {
 /**
  * Function to complete the transaction and sending request to Veritrans.
  */
-function ubercart_veritrans_vtweb_payment_complete($order) {
+function uc_veritrans_vtweb_payment_complete($order) {
 
   // Return an error if the enabling action's settings haven't been configured.
-  $server_key = variable_get('ubercart_veritrans_server_key', '');
+  $server_key = variable_get('uc_veritrans_server_key', '');
   if (empty($server_key)) {
     drupal_set_message(t('Veritrans is not configured for use. Please check the Veritrans Server Key.'), 'error');
     return FALSE;
   }
   libraries_load('veritrans');
-  Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
-  $payment_mode = variable_get('ubercart_veritrans_payment_mode', '');
+  Veritrans_Config::$serverKey = variable_get('uc_veritrans_server_key', '');
+  $payment_mode = variable_get('uc_veritrans_payment_mode', 'TEST');
   if ($payment_mode == 'TEST') {
     Veritrans_Config::$isProduction = FALSE;
   }
@@ -110,12 +110,15 @@ function ubercart_veritrans_vtweb_payment_complete($order) {
     $item['name'] = $line_item->title;
     $items_details[] = $item;
   }
+  $finish_redirect_url = variable_get('uc_veritrans_finish_redirect_url', 'vt_web/success');
+  $unfinish_redirect_url = variable_get('uc_veritrans_unfinish_redirect_url', 'vt_web/unfinsh');
+  $error_redirect_url = variable_get('uc_veritrans_error_redirect_url', 'vt_web/error');
   $params = array(
     "vtweb" => array(
       'enabled_payments' => array('credit_card'),
-      'finish_redirect_url' => variable_get('ubercart_veritrans_finish_redirect_url', url('vt_web/success')),
-      'unfinish_redirect_url' => variable_get('ubercart_veritrans_unfinish_redirect_url', url('vt_web/unfinsh')),
-      'error_redirect_url' => variable_get('ubercart_veritrans_error_redirect_url', url('vt_web/error')),
+      'finish_redirect_url' => url($finish_redirect_url,array('absolute'=>TRUE)),
+      'unfinish_redirect_url' => url($unfinish_redirect_url,array('absolute'=>TRUE)),
+      'error_redirect_url' => url($error_redirect_url,array('absolute'=>TRUE)),
     ),
     'transaction_details' => array(
       'order_id' => $order->order_id,
@@ -153,12 +156,12 @@ function ubercart_veritrans_vtweb_payment_complete($order) {
 /**
  * IPN for veritrans payment gateway.
  */
-function ubercart_veritrans_vt_web_payment_notification() {
+function uc_veritrans_vt_web_payment_notification() {
   libraries_load('veritrans');
   $notification = new Veritrans_Notification();
 
   $order = uc_order_load($notification->order_id);
-  if (variable_get('ubercart_veritrans_debugging', FALSE)) {
+  if (variable_get('uc_veritrans_debugging', FALSE)) {
     watchdog('vt_web', 'Responce from Veritrance  <pre>' . print_r($notification, TRUE) . '</pre>', array(), WATCHDOG_DEBUG);
   }
 
@@ -172,7 +175,7 @@ function ubercart_veritrans_vt_web_payment_notification() {
     return FALSE;
   }
 
-  Veritrans_Config::$serverKey = variable_get('ubercart_veritrans_server_key', '');
+  Veritrans_Config::$serverKey = variable_get('uc_veritrans_server_key', '');
   $transaction = $notification->transaction_status;
   $fraud = $notification->fraud_status;
   if ($transaction == 'capture') {
@@ -228,35 +231,35 @@ function ubercart_veritrans_vt_web_payment_notification() {
 /**
  * Success callback.
  */
-function ubercart_veritrans_vt_web_payment_success() {
+function uc_veritrans_vt_web_payment_success() {
   return t('This is success page.');
 }
 
 /**
  * Unfinish callback.
  */
-function ubercart_veritrans_vt_web_payment_unfinish() {
+function uc_veritrans_vt_web_payment_unfinish() {
   return t('This is unfinsh page.');
 }
 
 /**
  * Error callback.
  */
-function ubercart_veritrans_vt_web_payment_error() {
+function uc_veritrans_vt_web_payment_error() {
   return t('This is error page.');
 }
 
 /**
  * Implements hook_uc_payment_gateway().
  */
-function ubercart_veritrans_uc_payment_method() {
+function uc_veritrans_uc_payment_method() {
   $methods['vt_web'] = array(
     'name' => t('Veritrans'),
     'title' => t('Veritrans'),
     'review' => t('Veritrans'),
     'desc' => t('Redirect users to submit payments through Veritrans.'),
-    'callback' => 'ubercart_veritrans_ubercart_payment_method_vt_web',
-    'redirect' => 'ubercart_veritrans_vt_web_payment_form',
+    'callback' => 'uc_veritrans_payment_method_vt_web',
+    'redirect' => 'uc_veritrans_vt_web_payment_form',
     'weight' => 1,
     'checkout' => FALSE,
     'no_gateway' => TRUE,
@@ -267,7 +270,7 @@ function ubercart_veritrans_uc_payment_method() {
 /**
  * Veritrans checkout page alter.
  */
-function ubercart_veritrans_vt_web_payment_form($form, &$form_state, $order) {
+function uc_veritrans_vt_web_payment_form($form, &$form_state, $order) {
   $form['#action'] = url('vt_web/' . $order->order_id);
   $form['#method'] = 'GET';
 
@@ -281,19 +284,19 @@ function ubercart_veritrans_vt_web_payment_form($form, &$form_state, $order) {
 /**
  * Veritrans settings page.
  */
-function ubercart_veritrans_ubercart_payment_method_vt_web($op, &$arg1) {
+function uc_veritrans_payment_method_vt_web($op, &$arg1) {
   switch ($op) {
     case 'settings':
-      $form['ubercart_veritrans_server_key'] = array(
+      $form['uc_veritrans_server_key'] = array(
         '#type' => 'textfield',
         '#title' => t('Server Key'),
         '#description' => t('Your Veritrans Server key.'),
-        '#default_value' => variable_get('ubercart_veritrans_server_key', ''),
+        '#default_value' => variable_get('uc_veritrans_server_key', ''),
         '#size' => 50,
         '#required' => TRUE,
       );
 
-      $form['ubercart_veritrans_payment_mode'] = array(
+      $form['uc_veritrans_payment_mode'] = array(
         '#type' => 'select',
         '#title' => t('Payment mode'),
         '#description' => t('The mode for capturing payment.'),
@@ -301,31 +304,31 @@ function ubercart_veritrans_ubercart_payment_method_vt_web($op, &$arg1) {
           'LIVE' => t('Live transactions'),
           'TEST' => t('Test transactions'),
         ),
-        '#default_value' => variable_get('ubercart_veritrans_payment_mode', ''),
+        '#default_value' => variable_get('uc_veritrans_payment_mode', ''),
       );
-      $form['ubercart_veritrans_error_redirect_url'] = array(
+      $form['uc_veritrans_error_redirect_url'] = array(
         '#type' => 'textfield',
         '#title' => t('Error Url'),
         '#description' => t('The mode for error url.'),
-        '#default_value' => variable_get('ubercart_veritrans_error_redirect_url', ''),
+        '#default_value' => variable_get('uc_veritrans_error_redirect_url', ''),
       );
-      $form['ubercart_veritrans_unfinish_redirect_url'] = array(
+      $form['uc_veritrans_unfinish_redirect_url'] = array(
         '#type' => 'textfield',
         '#title' => t('Unfinsih Url'),
         '#description' => t('The mode for finish url.'),
-        '#default_value' => variable_get('ubercart_veritrans_finish_redirect_url', ''),
+        '#default_value' => variable_get('uc_veritrans_finish_redirect_url', ''),
       );
-      $form['ubercart_veritrans_finish_redirect_url'] = array(
+      $form['uc_veritrans_finish_redirect_url'] = array(
         '#type' => 'textfield',
         '#title' => t('Finsih Url'),
         '#description' => t('The mode for finish url.'),
-        '#default_value' => variable_get('ubercart_veritrans_finish_redirect_url', ''),
+        '#default_value' => variable_get('uc_veritrans_finish_redirect_url', ''),
       );
-      $form['ubercart_veritrans_debugging'] = array(
+      $form['uc_veritrans_debugging'] = array(
         '#type' => 'checkbox',
         '#title' => t('Debugg'),
         '#description' => t('Check the response from veritrans.'),
-        '#default_value' => variable_get('ubercart_veritrans_debugging', FALSE),
+        '#default_value' => variable_get('uc_veritrans_debugging', FALSE),
       );
       return $form;
   }
