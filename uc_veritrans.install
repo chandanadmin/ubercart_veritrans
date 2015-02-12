@@ -71,7 +71,7 @@ function uc_veritrans_install() {
   variable_set('uc_veritrans_error_redirect_url', 'vt_web/error');
   variable_set('uc_veritrans_unfinish_redirect_url', 'vt_web/unfinsh');
   variable_set('uc_veritrans_finish_redirect_url', 'vt_web/success');
-  variable_set('uc_veritrans_debugging', TRUE);
+  variable_set('uc_veritrans_debugging', FALSE);
 }
 
 /**
