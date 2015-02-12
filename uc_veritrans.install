@@ -14,18 +14,10 @@ function uc_veritrans_requirements($phase) {
     $t = get_t();
     $has_curl = function_exists('curl_init');
     $version = explode('-', PHP_VERSION);
-    $php_compatible = version_compare($version[0], '5.2.1', '>');
     $has_json = function_exists('json_decode');
     $requirements['uc_veritrans_curl'] = array(
       'title' => $t('CURL'),
       'value' => $has_curl ? $t('Enabled') : $t('Not found'),
-      'description' => '',
-      'severity' => REQUIREMENT_OK,
-    );
-
-    $requirements['uc_veritrans_php'] = array(
-      'title' => $t('PHP Version > 5.2.1'),
-      'value' => $php_compatible ? $t('True') : $t('False'),
       'description' => '',
       'severity' => REQUIREMENT_OK,
     );
@@ -41,11 +33,6 @@ function uc_veritrans_requirements($phase) {
       $requirements['uc_veritrans_curl']['severity'] = REQUIREMENT_ERROR;
       $url = l($t('cURL'), "http://php.net/manual/en/curl.setup.php");
       $requirements['uc_veritrans_curl']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
-    }
-
-    if (!$php_compatible) {
-      $requirements['uc_veritrans_php']['severity'] = REQUIREMENT_ERROR;
-      $requirements['uc_veritrans_php']['description'] = $t('The testing framework could not be installed because the PHP version is not compatible.');
     }
 
     if (!$has_json) {
