@@ -13,33 +13,17 @@ function uc_veritrans_requirements($phase) {
   if ($phase == 'runtime' || $phase == 'install') {
     $t = get_t();
     $has_curl = function_exists('curl_init');
-    $has_json = function_exists('json_decode');
     $requirements['uc_veritrans_curl'] = array(
       'title' => $t('CURL'),
       'value' => $has_curl ? $t('Enabled') : $t('Not found'),
       'description' => '',
       'severity' => REQUIREMENT_OK,
     );
-
-    $requirements['uc_veritrans_json'] = array(
-      'title' => $t('JSON'),
-      'value' => $has_json ? $t('Enabled') : $t('Not found'),
-      'description' => '',
-      'severity' => REQUIREMENT_OK,
-    );
-
     if (!$has_curl) {
       $requirements['uc_veritrans_curl']['severity'] = REQUIREMENT_ERROR;
       $url = l($t('cURL'), "http://php.net/manual/en/curl.setup.php");
       $requirements['uc_veritrans_curl']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
     }
-
-    if (!$has_json) {
-      $requirements['uc_veritrans_json']['severity'] = REQUIREMENT_ERROR;
-      $url = l($t('Json'), "http://php.net/manual/en/book.json.php");
-      $requirements['uc_veritrans_json']['description'] = $t('The testing framework could not be installed because the PHP !json is not available.', array('!json' => $url));
-    }
-
     $requirements['veritrans']['title'] = 'Veritrans';
     $requirements['veritrans']['value'] = $t('Installed');
     $veritrans_class = drupal_get_path('module', 'uc_veritrans') . '/veritrans/Veritrans.php';
