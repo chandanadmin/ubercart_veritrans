@@ -174,7 +174,7 @@ function uc_veritrans_payment_method_vt_web($op, &$arg1) {
 }
 
 /**
- * Link Validation
+ * Link Validation.
  */
 function uc_veritrans_link_validate($element, &$form_state) {
   $element_name = $element['#name'];

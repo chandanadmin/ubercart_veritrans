@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Defines the veritrans pages.
+ */
+
+/**
  * Function to complete the transaction and sending request to Veritrans.
  */
 function uc_veritrans_vtweb_payment_complete($order) {

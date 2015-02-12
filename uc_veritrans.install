@@ -13,7 +13,6 @@ function uc_veritrans_requirements($phase) {
   if ($phase == 'runtime' || $phase == 'install') {
     $t = get_t();
     $has_curl = function_exists('curl_init');
-    $version = explode('-', PHP_VERSION);
     $has_json = function_exists('json_decode');
     $requirements['uc_veritrans_curl'] = array(
       'title' => $t('CURL'),
