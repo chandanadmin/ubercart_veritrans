@@ -81,4 +81,6 @@ function uc_veritrans_uninstall() {
   db_delete('variable')
       ->condition('name', "uc_veritrans_%", "LIKE")
       ->execute();
+
+  cache_clear_all('variables', 'cache_bootstrap');
 }
