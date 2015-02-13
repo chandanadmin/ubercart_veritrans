@@ -149,7 +149,7 @@ function uc_veritrans_vt_web_payment_notification() {
     uc_order_comment_save($order->order_id, 0, $webpay_error);
   }
   else {
-    watchdog('vt_web', 'Something went wrong, please contact site administrator.');
+    watchdog('vt_web', 'Transaction type is incorrect @transaction. Check Response from Veritrance <pre>@response</pre>', array('@response' => print_r($notification, TRUE), '@transaction' => $transaction), WATCHDOG_DEBUG);
   }
 }
 
