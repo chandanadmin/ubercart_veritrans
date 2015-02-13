@@ -191,7 +191,10 @@ function uc_veritrans_link_validate($element, &$form_state) {
 function uc_veritrans_vt_web_payment_notification() {
   libraries_load('veritrans');
   $notification = new Veritrans_Notification();
-
+  if (empty($notification->order_id)) {
+    $error_redirect_url = variable_get('uc_veritrans_error_redirect_url', 'vt_web/error');
+    drupal_goto($error_redirect_url);
+  }
   $order = uc_order_load($notification->order_id);
   if (variable_get('uc_veritrans_debugging', FALSE)) {
     watchdog('vt_web', 'Response from Veritrance  <pre>!response</pre>', array('!response' => print_r($notification, TRUE)), WATCHDOG_DEBUG);
@@ -199,7 +202,7 @@ function uc_veritrans_vt_web_payment_notification() {
 
   if ($order == FALSE) {
     watchdog('vt_web', 'IPN attempted for non-existent order @order_id.', array('@order_id' => $notification->order_id), WATCHDOG_ERROR);
-    return;
+    return FALSE;
   }
   // Exit now if the $_POST was empty.
   if (empty($notification)) {
