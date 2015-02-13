@@ -22,7 +22,7 @@ function uc_veritrans_requirements($phase) {
     if (!$has_curl) {
       $requirements['uc_veritrans_curl']['severity'] = REQUIREMENT_ERROR;
       $url = l($t('cURL'), "http://php.net/manual/en/curl.setup.php");
-      $requirements['uc_veritrans_curl']['description'] = $t('The testing framework could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
+      $requirements['uc_veritrans_curl']['description'] = $t('UC Veritrans could not be installed because the PHP !cURL library is not available.', array('!cURL' => $url));
     }
     $requirements['veritrans']['title'] = 'Veritrans';
     $requirements['veritrans']['value'] = $t('Installed');
