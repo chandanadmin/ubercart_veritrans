@@ -87,7 +87,7 @@ function uc_veritrans_vt_web_payment_notification() {
 
   $order = uc_order_load($notification->order_id);
   if (variable_get('uc_veritrans_debugging', FALSE)) {
-    watchdog('vt_web', 'Response from Veritrance  <pre>!response</pre>', array('!response' => print_r($notification, TRUE)), WATCHDOG_DEBUG);
+    watchdog('vt_web', 'Response from Veritrance  <pre>@response</pre>', array('@response' => print_r($notification, TRUE)), WATCHDOG_DEBUG);
   }
 
   if ($order == FALSE) {
