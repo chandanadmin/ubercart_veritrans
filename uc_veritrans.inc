@@ -98,3 +98,81 @@ function uc_veritrans_vt_web_payment_unfinish() {
 function uc_veritrans_vt_web_payment_error() {
   return t('This is error page.');
 }
+
+/**
+ * IPN for veritrans payment gateway.
+ */
+function uc_veritrans_vt_web_payment_notification() {
+  libraries_load('veritrans');
+  $notification = new Veritrans_Notification();
+  $order_id = $notification->order_id;
+  if (empty($order_id)) {
+    $error_redirect_url = variable_get('uc_veritrans_error_redirect_url', 'vt_web/error');
+    drupal_goto($error_redirect_url);
+  }
+  $order = uc_order_load($order_id);
+  if (variable_get('uc_veritrans_debugging', FALSE)) {
+    watchdog('vt_web', 'Response from Veritrance  <pre>@response</pre>', array('@response' => print_r($notification, TRUE)), WATCHDOG_DEBUG);
+  }
+
+  if ($order == FALSE) {
+    watchdog('vt_web', 'IPN attempted for non-existent order @order_id.', array('@order_id' => $notification->order_id), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  Veritrans_Config::$serverKey = variable_get('uc_veritrans_server_key', '');
+  $result = Veritrans_Transaction::status($order_id);
+  if ($result->transaction_id != $notification->transaction_id || $result->fraud_status != $notification->fraud_status) {
+    watchdog('vt_web', 'Verification of transaction failed.', array(), WATCHDOG_WARNING);
+    return FALSE;
+  }
+  $transaction = $notification->transaction_status;
+  $fraud = $notification->fraud_status;
+  if ($transaction == 'capture') {
+    if ($fraud == 'challenge') {
+      // TODO Set payment status in merchant's database to 'challenge'.
+      uc_order_update_status($order->order_id, 'vt_web_pending');
+      uc_order_comment_save($order->order_id, 0, t('Payment is pending at Veritrans'), 'admin');
+    }
+    elseif ($fraud == 'accept') {
+      // TODO Set payment status in merchant's database to 'success'.
+      // Update order state set to paid.
+      $order->order_total = round($order->order_total, 2);
+      $payment_amount = $order->order_total;
+      $context = array(
+        'revision' => 'formatted-original',
+        'type' => 'amount',
+      );
+      $options = array(
+        'sign' => TRUE,
+      );
+
+      // Confirm payment.
+      $payment_message = t('Payment using Veritrans. ORDERNUMBER: @ordernumber.', array('@ordernumber' => $order->order_id));
+      uc_payment_enter($order->order_id, 'vt_web', $order->order_total, $order->uid, NULL, $payment_message);
+      uc_cart_complete_sale($order, FALSE);
+      uc_order_update_status($order->order_id, 'payment_received');
+      $webpay_amount = array(
+        '@amount' => uc_price($payment_amount, $context, $options),
+      );
+      $payment_submitted = t('Payment of @amount submitted through Veritrans.', $webpay_amount);
+      uc_order_comment_save($order->order_id, 0, $payment_submitted, 'order', 'payment_received');
+      $payment_reported = t('Veritrans  reported a payment of @amount.', $webpay_amount);
+      uc_order_comment_save($order->order_id, 0, $payment_reported);
+    }
+  }
+  elseif ($transaction == 'cancel') {
+    if ($fraud == 'challenge' || $fraud == 'accept') {
+      // TODO Set payment status in merchant's database to 'failure'.
+      $webpay_error = t('Payment declined by merchant.');
+      uc_order_comment_save($order->order_id, 0, $webpay_error);
+    }
+  }
+  elseif ($transaction == 'deny') {
+    // TODO Set payment status in merchant's database to 'failure'.
+    $webpay_error = t('Payment declined by merchant.');
+    uc_order_comment_save($order->order_id, 0, $webpay_error);
+  }
+  else {
+    watchdog('vt_web', 'Invalid Transaction. Check Response from Veritrance <pre>@response</pre>', array('@response' => print_r($notification, TRUE)), WATCHDOG_DEBUG);
+  }
+}
