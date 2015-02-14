@@ -1,7 +1,9 @@
 name = Ubercart Veritrans
 description = Process payments using the veritrans payment gateway.
+dependencies[] = libraries
+dependencies[] = uc_order
 dependencies[] = uc_payment
-dependencies[] = uc_credit
+dependencies[] = uc_cart
 package = Ubercart - payment
 core = 7.x
 php = 5.3

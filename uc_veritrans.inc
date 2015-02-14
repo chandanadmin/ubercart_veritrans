@@ -136,27 +136,12 @@ function uc_veritrans_vt_web_payment_notification() {
     elseif ($fraud == 'accept') {
       // TODO Set payment status in merchant's database to 'success'.
       // Update order state set to paid.
-      $order->order_total = round($order->order_total, 2);
-      $payment_amount = $order->order_total;
-      $context = array(
-        'revision' => 'formatted-original',
-        'type' => 'amount',
-      );
-      $options = array(
-        'sign' => TRUE,
-      );
-
       // Confirm payment.
-      $payment_message = t('Payment using Veritrans. ORDERNUMBER: @ordernumber.', array('@ordernumber' => $order->order_id));
+      $payment_message = t('Payment using Veritrans. transaction @trans_id for ORDERNUMBER: @ordernumber.', array('@trans_id'=>$notification->transaction_id,'@ordernumber' => $order->order_id));
       uc_payment_enter($order->order_id, 'vt_web', $order->order_total, $order->uid, NULL, $payment_message);
-      uc_cart_complete_sale($order, FALSE);
+      uc_cart_complete_sale($order);
       uc_order_update_status($order->order_id, 'payment_received');
-      $webpay_amount = array(
-        '@amount' => uc_price($payment_amount, $context, $options),
-      );
-      $payment_submitted = t('Payment of @amount submitted through Veritrans.', $webpay_amount);
-      uc_order_comment_save($order->order_id, 0, $payment_submitted, 'order', 'payment_received');
-      $payment_reported = t('Veritrans  reported a payment of @amount.', $webpay_amount);
+      $payment_reported = t('Veritrans  reported a payment of @amount.', $order->order_total);
       uc_order_comment_save($order->order_id, 0, $payment_reported);
     }
   }
