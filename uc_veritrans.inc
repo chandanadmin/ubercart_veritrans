@@ -137,7 +137,7 @@ function uc_veritrans_vt_web_payment_notification() {
       // TODO Set payment status in merchant's database to 'success'.
       // Update order state set to paid.
       // Confirm payment.
-      $payment_message = t('Payment using Veritrans. transaction @trans_id for ORDERNUMBER: @ordernumber.', array('@trans_id' => $notification->transaction_id, '@ordernumber' => $order->order_id));
+      $payment_message = t('Payment using Veritrans for ORDERNUMBER: @ordernumber.', array('@ordernumber' => $order->order_id));
       uc_payment_enter($order->order_id, 'vt_web', $order->order_total, $order->uid, NULL, $payment_message);
       uc_cart_complete_sale($order);
       uc_order_update_status($order->order_id, 'payment_received');
