@@ -130,7 +130,7 @@ function uc_veritrans_vt_web_payment_notification() {
   if ($transaction == 'capture') {
     if ($fraud == 'challenge') {
       // TODO Set payment status in merchant's database to 'challenge'.
-      uc_order_update_status($order->order_id, 'vt_web_pending');
+      uc_order_update_status($order->order_id, 'pending');
       uc_order_comment_save($order->order_id, 0, t('Payment is pending at Veritrans'), 'admin');
     }
     elseif ($fraud == 'accept') {
@@ -141,21 +141,21 @@ function uc_veritrans_vt_web_payment_notification() {
       uc_payment_enter($order->order_id, 'vt_web', $order->order_total, $order->uid, NULL, $payment_message);
       uc_cart_complete_sale($order);
       uc_order_update_status($order->order_id, 'payment_received');
-      $payment_reported = t('Veritrans  reported a payment of @amount.', $order->order_total);
-      uc_order_comment_save($order->order_id, 0, $payment_reported);
+      $payment_reported = t('Veritrans  reported a payment of @amount.', array('@amount' => $order->order_total));
+      uc_order_comment_save($order->order_id, 0, $payment_reported, 'admin');
     }
   }
   elseif ($transaction == 'cancel') {
     if ($fraud == 'challenge' || $fraud == 'accept') {
       // TODO Set payment status in merchant's database to 'failure'.
-      $webpay_error = t('Payment declined by merchant.');
-      uc_order_comment_save($order->order_id, 0, $webpay_error);
+	  uc_order_update_status($order->order_id, 'canceled');
+      uc_order_comment_save($order->order_id, 0, t('Payment canceled by merchant.'), 'admin');
     }
   }
   elseif ($transaction == 'deny') {
     // TODO Set payment status in merchant's database to 'failure'.
-    $webpay_error = t('Payment declined by merchant.');
-    uc_order_comment_save($order->order_id, 0, $webpay_error);
+    uc_order_update_status($order->order_id, 'canceled');
+    uc_order_comment_save($order->order_id, 0, t('Payment declined by merchant.'), 'admin');
   }
   else {
     watchdog('vt_web', 'Invalid Transaction. Check Response from Veritrance <pre>@response</pre>', array('@response' => print_r($notification, TRUE)), WATCHDOG_DEBUG);
